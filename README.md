@@ -47,16 +47,18 @@ git clone https://github.com/sun-xihe/dsh-kimi-provider.git
 cd dsh-kimi-provider
 npm pack
 
-dsh plugin --profile web add ./dsh-kimi-provider-0.1.0.tgz
+dsh plugin --profile web add ./dsh-kimi-provider-0.1.1.tgz
 ```
 
 Then restart `dsh web` and open Settings -> Providers -> Kimi Code.
 
-## What v0.1 does
+## What v0.1.1 does
 
 - imports the existing Kimi Code CLI OAuth state;
 - stores the access/refresh tokens in DSH Credentials;
 - activates `llm-pi-ai.providers.kimi-coding.apiKeyEnv`;
+- keeps the built-in K3/Kimi Coding model input capability at `text + image`
+  when no explicit user model override exists;
 - refreshes Kimi OAuth tokens before expiry;
 - uses the same credential lock file as Kimi CLI-compatible integrations to avoid refresh-token rotation races;
 - writes rotated tokens back to the Kimi CLI credential file atomically;
@@ -66,7 +68,17 @@ Disconnecting only removes the DSH credential references and provider activation
 
 ## Multimodal behavior
 
-This plugin does not transform images itself. When the pi-ai catalog advertises `image` input for the selected Kimi model, DSH's official attachment service resolves the image bytes and `llm-pi-ai` forwards them through the built-in provider.
+This plugin does not transform images itself. DSH's official attachment service
+resolves durable image references into bytes, `llm-pi-ai` converts them to pi-ai
+`ImageContent`, and pi-ai's Anthropic Messages adapter sends base64 image blocks
+to the Kimi Coding endpoint.
+
+The upstream pi-ai 0.82.1 catalog already declares `text + image` for `k3`,
+`k3-256k`, `kimi-for-coding`, and `kimi-for-coding-highspeed`. This plugin also
+writes matching `modelOverrides` when those entries have no explicit user input
+override. That compatibility guard prevents an older or drifted catalog from
+rejecting the attachment before the existing converter runs. A non-empty user
+override remains authoritative and is never replaced.
 
 That is the main architectural difference from implementing another custom Kimi adapter.
 

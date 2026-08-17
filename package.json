@@ -1,6 +1,6 @@
 {
   "name": "dsh-kimi-provider",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Kimi Code provider for DeepSeek Harness using Kimi CLI OAuth and DSH's built-in pi-ai kimi-coding route.",
   "type": "module",
   "main": "lib/index.js",
@@ -37,7 +37,8 @@
     "node": ">=22"
   },
   "scripts": {
-    "check": "node --check lib/index.js && node --check lib/client.js"
+    "check": "node --check lib/index.js && node --check lib/client.js && node --check lib/model-capabilities.js",
+    "test": "node --test test/*.test.js"
   },
   "dsh": {
     "bundle": {
